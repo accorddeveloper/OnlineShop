@@ -1,0 +1,72 @@
+﻿@using OnlineShop.Models
+@{
+    var db = new OnlineShopDb();
+    var categories = db.Categories
+        .Where(x => x.Status == "ACTIVE")
+        .OrderBy(x => x.SortOrder).ToList();
+}
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            @Html.ActionLink("Online Shope", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                <li>@Html.ActionLink("About", "About", "Home")</li>
+                <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                <!--DROPDOWN CATEGORIES-->
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        @foreach (var category in categories.Where(x => x.ParentId == 0))
+                        {
+                            <li>
+                                <a href="@Url.Action("DisplayByCategory", "Products", new {categoryId = category.Id})">
+                                    <strong>@category.Name</strong>
+                                </a>
+                            </li>
+                            foreach (var sub in categories.Where(x => x.ParentId == category.Id))
+                            {
+                                <li>
+                                    <a href="@Url.Action("DisplayByCategory", "Products", new {categoryId = sub.Id})">
+                                        <span style="margin-left: 20px"></span> <i class="fa fa-chevron-right" aria-hidden="true"></i>  @sub.Name
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </li>
+                <!--/DROPDOWN CATEGORIES-->
+
+                <!--DROPDOWN ADMIN-->
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Administrators <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        @if (User.IsInRole("Admins"))
+                        {
+                            
+                        }
+                        <li><a href="@Url.Action("Index", "ManageCategories")">Manage Categories</a></li>
+                        <li><a href="@Url.Action("Index", "ManageProducts")">Manage Products</a></li>
+                        <li><a href="@Url.Action("Index", "ManageOrders")">Manage Orders</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="@Url.Action("Index", "ManageUsers")">Manage Users</a></li>
+                        <li><a href="@Url.Action("Index", "ManageRoles")">Manage Roles</a></li>
+                    </ul>
+                </li>
+                <!--/DROPDOWN ADMIN-->
+            </ul>
+
+            @Html.Partial("_ShoppingCartIconPartial")
+
+            @Html.Partial("_LoginPartial")
+        </div>
+    </div>
+</div>

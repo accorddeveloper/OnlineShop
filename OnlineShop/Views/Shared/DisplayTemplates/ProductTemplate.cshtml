@@ -1,0 +1,138 @@
+﻿@model OnlineShop.Models.Product
+
+<div class="col-md-4" style="margin-bottom: 20px">
+    <div class="img-thumbnail">
+        <div style="height: 180px; overflow: hidden">
+            <a href="@Url.Action("Details", "Products", new {Id = Model.Id})">
+                @if (string.IsNullOrEmpty(Model.ImageUrl) == false)
+                {
+                    <img src="@Url.Content(Model.ImageUrl)" style="width: 100%"/>
+                }
+            </a>
+        </div>
+        <div class="text-center">
+            <h4>@Model.Name</h4>
+
+            @if (Model.Discount > 0)
+            {
+                <div>
+                    <span style="text-decoration: line-through"> @Model.Price.ToString("N0")</span>
+                    <span style="font-weight: bold">  @((Model.Price*(100 - Model.Discount)/100).ToString("N0"))</span>
+                </div>
+            }
+            else
+            {
+                <div>Price: @Model.Price.ToString("N0")</div>
+            }
+            
+            <div style="margin-top: 12px;">
+                @using (Html.BeginForm("AddToCart", "ShoppingCart"))
+                {
+                    <input type="hidden" name="ProductId" value="@Model.Id"/>
+                    <input type="hidden" name="Quantity" value="1"/>
+                    // Trong trường hợp dùng DisplayTemplate thì không dùng như bên dưới
+                    @*
+                    @Html.Hidden("ProductId", Model.Id)
+                    @Html.Hidden("Quantity", "1")
+                    *@
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        <span class="glyphicon glyphicon-shopping-cart"></span> Add to cart
+                    </button>
+                }
+                <button onclick="AddToCart(@Model.Id, '@Model.Name')" type="button" class="btn btn-sm btn-primary">
+                    <span class="glyphicon glyphicon-shopping-cart"></span> Add to cart
+                </button>
+            </div>
+        </div>
+        <div style="margin-bottom: 20px"></div>
+    </div>
+</div>
+
+<script>
+
+    function showMessage(message) {
+        Command: toastr["success"](message, "Notification");
+
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": false,
+            "positionClass": "toast-bottom-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+    }
+
+    function AddToCart(id, name) {
+        $.post('@Url.Action("AddToCart", "ShoppingCart")', { ProductId: id, Quantity: 1 })
+            .done(function(data) {
+                //alert("Thank you");
+                $.get("@Url.Action("GetCartNumbers", "ShoppingCart")", function(data) {
+                    $("#notification-count").text(data);
+
+                    // SWEET ALERT
+                    
+                    @*swal(
+                        'Thank you!',
+                        '<a href="@Url.Action("CheckOut", "ShoppingCart")">View Shopping Cart</a>',
+                        'success'
+                    );*@
+                   
+                    // NOTIFY
+                    showMessage(name + " was added to shopping cart");
+
+                    $.get("@Url.Action("GetShoppingCartItems", "ShoppingCart")", function(data) {
+                        var html = "<table class='table'>";
+                        html += "<tr>";
+
+                        html += "<th></th>";
+                        html += "<th>Name</th>";
+                        html += "<th>Price</th>";
+                        html += "<th>Quantity</th>";
+                        html += "<th>Discount</th>";
+                        html += "<th>Sum</th>";
+                        html += "</tr>";
+
+                        var total = 0;
+                        jQuery.each(data, function (index, item) {
+
+                            var sum = (item.Price * (100 - item.Discount) / 100) * item.Quantity;
+                            total += sum;
+                            html += "<tr>";
+
+                            html += "<td>";
+                            html += "<img class='img img-thumbnail' style='width: 60px;' src='" + item.ImageUrl.replace('~/', '/') + "'>";
+                            html += "</td>";
+
+                            html += "<td>" + item.Name + "</td>";
+                            html += "<td>" + item.Price + "</td>";
+                            html += "<td>" + item.Quantity + "</td>";
+                            html += "<td>" + item.Discount + "</td>";
+                            html += "<td>" + sum + "</td>";
+                            html += "</tr>";
+                            console.log(item.Id + " - " + item.Name);
+                        });
+
+                        html += "<tr>";
+                        html += "<td colspan='5'>Total:</td>";
+                        html += "<td>" + total + "</td>";
+                        html += "</tr>";
+                        html += "</table>";
+
+                        $("#notification").html("");
+                        $("#notification").html(html);
+                    });
+                });
+
+            });
+    }
+</script>

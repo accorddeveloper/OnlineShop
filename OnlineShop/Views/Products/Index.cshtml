@@ -1,0 +1,42 @@
+﻿@model IEnumerable<OnlineShop.Models.Product>
+@{
+    ViewBag.Title = "Products";
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@*<div class="row">
+        <div class="col-md-12">
+            @Html.Partial("_SlidePartial")
+        </div>
+    </div>*@
+<div>
+    <select id="sort" class="form-control">
+        <option value="asc">Giá từ thấp đến cao</option>
+        <option value="desc">Giá từ cao đến thấp</option>
+    </select>
+</div>
+<div class="row">
+    @foreach (var p in Model)
+    {
+        @Html.DisplayFor(x => p, "ProductTemplate")
+    }
+</div>
+
+
+@section scripts {
+    <script>
+        var selectSort = '@Request.QueryString["sort"]';
+        
+        if (selectSort == '') selectSort = "asc";
+        $("#sort").val(selectSort);
+
+        $("#sort").change(function () {
+            var s = $(this).val();
+
+            window.location.href = "@Url.Action("Index", "Products")?sort=" + s;
+        });
+    </script>
+}

@@ -1,0 +1,162 @@
+﻿@using OnlineShop.Models
+@model OnlineShop.Models.Order
+@{
+    ViewBag.Title = "CheckOut";
+
+    var shoppingCart = (ShoppingCart)Session["ShoppingCart"];
+}
+
+<h2>CheckOut</h2>
+
+@using (Html.BeginForm("UpdateShoppingCart", "ShoppingCart"))
+{
+
+
+    <table id="shoppingCart" class="table table-hover">
+        <tr>
+            <th>Id</th>
+            <th></th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Discount</th>
+            <th>Sum</th>
+            <th></th>
+            <th></th>
+        </tr>
+        @{
+            decimal total = 0;
+            var stt = 1;
+        }
+        @foreach (var shoppingCartItem in shoppingCart.ShoppingCartItems)
+        {
+            <tr id="row_@shoppingCartItem.Item.Id">
+                <td>
+                    @shoppingCartItem.Item.Id
+                </td>
+                <td>
+                    @if (string.IsNullOrEmpty(shoppingCartItem.Item.ImageUrl) == false)
+                    {
+                        <img src="@Url.Content(shoppingCartItem.Item.ImageUrl)" style="width: 80px" />
+                    }
+
+                </td>
+                <td>
+                    @shoppingCartItem.Item.Name
+                </td>
+                <td>
+                    <input type="hidden" name="ProductId_@stt" value="@shoppingCartItem.Item.Id" />
+                    <input type="number" name="Quantity_@stt" value="@shoppingCartItem.Quantity" class="form-control" />
+                </td>
+                <td>
+                    @shoppingCartItem.Item.Price.ToString("N0")
+                </td>
+                <td>
+                    @shoppingCartItem.Item.Discount.ToString("N0")
+                </td>
+                <td>
+                    @{
+                        var quantity = shoppingCartItem.Quantity;
+                        var price = shoppingCartItem.Item.Price;
+                        var discount = shoppingCartItem.Item.Discount;
+                        var sum = (quantity * price) * (100 - discount);
+                        total = total + sum;
+                    }
+
+                    @sum.ToString("N0")
+
+
+
+                </td>
+                <td>
+                    @*@using (Html.BeginForm("RemoveCart", "ShoppingCart"))
+                    {
+                        @Html.Hidden("ProductId", shoppingCartItem.Item.Id)
+                        <button type="submit" class="btn btn-danger">
+                            <span class="glyphicon glyphicon-trash"></span>
+                        </button>
+                    }*@
+
+                </td>
+                <td>
+                    <button onclick="RemoveCart('@shoppingCartItem.Item.Id'); return false;" type="button" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-trash"></span>
+                    </button>
+                </td>
+            </tr>
+                            stt++;
+                        }
+        <tr>
+            <td colspan="8">
+                Total:
+            </td>
+            <td>
+                <strong>
+                    @total.ToString("N0")
+                </strong>
+            </td>
+        </tr>
+    </table>
+    <input type="submit" value="Update shopping cart" class="btn btn-default" />
+                        }
+<hr />
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Order Contact</h4>
+        <hr />
+        <div class="form-group">
+            @Html.LabelFor(model => model.ContactName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ContactName, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.ContactName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ContactAddress, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ContactAddress, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.ContactAddress, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ContactPhone, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ContactPhone, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.ContactPhone, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ContactEmail, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ContactEmail, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.ContactEmail, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Confirm Checkout" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts {
+    <script>
+        function RemoveCart(id) {
+            $.post('@Url.Action("RemoveCart", "ShoppingCart")', { ProductId: id })
+              .done(function (data) {
+                  //alert("Data Loaded: " + data);
+
+                  $('table#shoppingCart tr#row_' + id).remove();
+              });
+        }
+    </script>
+}

@@ -1,0 +1,29 @@
+﻿@using OnlineShop.Models
+@{
+    var db = new OnlineShopDb();
+    var categories = db.Categories.Where(x => x.Status == "ACTIVE").OrderBy(x => x.SortOrder).ToList();
+    var level1_categories = categories.Where(x => x.ParentId == 0);
+}
+
+<div style="margin-top: 20px;"></div>
+@foreach (var c1 in level1_categories)
+{
+
+    <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading">@c1.Name</div>
+
+        @{
+            var level2_Categories = categories.Where(x => x.ParentId == c1.Id).ToList();
+        }
+        <!-- List group -->
+        <div class="list-group">
+            @foreach (var c2 in level2_Categories)
+            {
+                <a href="@Url.Action("DisplayByCategory", "Products", new {categoryId = c2.Id})" class="list-group-item">
+                    <i class="fa fa-chevron-right" aria-hidden="true"></i>  @c2.Name
+                </a>
+            }
+        </div>
+    </div>
+}

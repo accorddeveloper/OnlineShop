@@ -1,0 +1,64 @@
+﻿@using OnlineShop.Models
+@{
+    var db = new OnlineShopDb();
+    var products = db.Products
+        .Where(x => x.Status == "ACTIVE" && x.DisplayPosition == "SLIDE")
+        .OrderBy(x => x.SortOrder).ToList();
+}
+
+
+<div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+  <!-- Indicators -->
+    <ol class="carousel-indicators">
+        @{
+            var index = 0;
+        }
+        @foreach (var product in products)
+        {
+            var classActive = "active";
+            if (index > 0)
+            {
+                classActive = "";
+            }
+
+            <li data-target="#carousel-example-generic" data-slide-to="@index" class="@classActive"></li>
+
+            index++;
+        }
+    </ol>
+
+  <!-- Wrapper for slides -->
+    <div class="carousel-inner" role="listbox">
+        @{
+            index = 0;
+        }
+        @foreach (var product in products)
+        {
+            var classActive = "active";
+            if (index > 0)
+            {
+                classActive = "";
+            }
+
+            <div class="item @classActive">
+                <img style="width: 100%" src="@Url.Content(product.ImageUrl)" alt="@product.Name">
+                <div class="carousel-caption">
+                    @product.Name
+                </div>
+            </div>
+
+            index++;
+        }
+       
+    </div>
+
+  <!-- Controls -->
+  <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
+    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
+    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+  </a>
+</div>

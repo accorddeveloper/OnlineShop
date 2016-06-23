@@ -1,0 +1,44 @@
+﻿@model IEnumerable<OnlineShop.Models.ProductImage>
+@{
+    ViewBag.Title = "UploadDetailsImages";
+}
+
+
+@using (Html.BeginForm("UploadDetailsImages", "ManageProducts", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-inline">
+        <!-- File Upload -->
+        <div class="form-group">
+
+            <input type="file" class="form-control" name="file" />
+
+            <input type="submit" value="Upload" class="btn btn-primary" />
+
+        </div>
+    </div>
+
+}
+<hr />
+<table>
+    @foreach (var image in Model)
+    {
+        <tr>
+            <td>
+                @image.Id
+            </td>
+            <td>
+                <img src="@Url.Content(image.ImageUrl)" style="width: 200px" class="img-thumbnail"/>
+            </td>
+            <td>
+                @using (Html.BeginForm("DeleteProductImage", "ManageProducts"))
+                {
+                    @*@Html.TextBox("DeleteId", image.Id)*@
+                    @Html.Hidden("DeleteId", image.Id)
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                }
+            </td>
+        </tr>
+    }
+</table>
+
