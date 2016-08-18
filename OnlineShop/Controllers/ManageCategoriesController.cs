@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using OnlineShop.Models;
+using OnlineShop.Repositories;
 
 namespace OnlineShop.Controllers
 {
@@ -18,7 +19,8 @@ namespace OnlineShop.Controllers
         // GET: ManageCategories
         public ActionResult Index()
         {
-            return View(db.Categories.ToList());
+            var result = CategoryRepository.GetAllSortByName();
+            return View(result);
         }
 
         // GET: ManageCategories/Details/5
